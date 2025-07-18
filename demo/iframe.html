@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Iframe de Loyalty</title>
+</head>
+<body>
+  <h1>App Loyalty embebida</h1>
+  <script>
+    window.addEventListener('message', (event) => {
+      if (event.origin !== 'http://127.0.0.1:8080') {
+        console.warn('Origen no autorizado:', event.origin);
+        return;
+      }
+
+      const { type, token } = event.data;
+      if (type === 'AUTH_TOKEN') {
+        console.log('✅ Token recibido correctamente:', token);
+        document.body.innerHTML += `<p>Token recibido:<br><code>${token}</code></p>`;
+      }
+    });
+  </script>
+</body>
+</html>
