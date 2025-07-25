@@ -9,6 +9,7 @@
             this.iframe = null;
             this.origin = '';
             this.token = '';
+            this.locale = 'en';
         }
         init(config) {
             const container = document.getElementById(config.containerId);
@@ -16,11 +17,40 @@
                 throw new Error('Container not found');
             this.origin = config.iframeOrigin;
             this.token = config.token;
+            this.locale = config.locale || 'en';
+            Object.assign(container.style, {
+                margin: '0',
+                padding: '0',
+                height: '100vh',
+                width: '100%',
+                backgroundColor: 'transparent',
+                border: 'none',
+            });
+            const style = document.createElement('style');
+            style.innerHTML = `
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        width: 100%;
+        overflow: hidden;
+        background: transparent;
+      }
+    `;
+            document.head.appendChild(style);
             this.iframe = document.createElement('iframe');
             this.iframe.src = `${config.iframeOrigin}/${config.module}`;
-            this.iframe.width = '100%';
-            this.iframe.height = config.height || '600';
-            this.iframe.sandbox = 'allow-scripts allow-same-origin';
+            this.iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+            this.iframe.setAttribute('scrolling', 'no');
+            Object.assign(this.iframe.style, {
+                border: 'none',
+                width: '100%',
+                height: '100vh',
+                margin: '0',
+                padding: '0',
+                display: 'block',
+                backgroundColor: 'transparent',
+            });
             this.iframe.onload = () => {
                 var _a;
                 this.sendToken();
@@ -33,7 +63,11 @@
         sendToken() {
             var _a;
             if ((_a = this.iframe) === null || _a === void 0 ? void 0 : _a.contentWindow) {
-                this.iframe.contentWindow.postMessage({ type: 'AUTH_TOKEN', token: this.token }, this.origin);
+                this.iframe.contentWindow.postMessage({
+                    type: 'AUTH_TOKEN',
+                    token: this.token,
+                    locale: this.locale
+                }, this.origin);
             }
         }
         refreshToken(newToken) {

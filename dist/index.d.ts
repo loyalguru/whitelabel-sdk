@@ -2,12 +2,13 @@ declare class EmbedLoyaltyApp {
     private iframe;
     private origin;
     private token;
+    private locale;
     init(config: {
         containerId: string;
-        module: 'loyalty' | 'cdp' | 'coupons';
+        module: 'loyalty' | 'cdp' | 'coupons' | 'login';
         iframeOrigin: string;
         token: string;
-        height?: string;
+        locale?: string;
         onLoad?: () => void;
         onError?: (e: Error) => void;
     }): void;

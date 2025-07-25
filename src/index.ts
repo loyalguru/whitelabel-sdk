@@ -2,13 +2,14 @@ class EmbedLoyaltyApp {
   private iframe: HTMLIFrameElement | null = null;
   private origin: string = '';
   private token: string = '';
+  private locale: string = 'en';
 
   init(config: {
     containerId: string;
-    module: 'loyalty' | 'cdp' | 'coupons';
+    module: 'loyalty' | 'cdp' | 'coupons' | 'login';
     iframeOrigin: string;
     token: string;
-    height?: string;
+    locale?: string;
     onLoad?: () => void;
     onError?: (e: Error) => void;
   }) {
@@ -17,17 +18,53 @@ class EmbedLoyaltyApp {
 
     this.origin = config.iframeOrigin;
     this.token = config.token;
+    this.locale = config.locale || 'en';
+
+    Object.assign(container.style, {
+      margin: '0',
+      padding: '0',
+      height: '100vh',
+      width: '100%',
+      backgroundColor: 'transparent',
+      border: 'none',
+    });
+
+    const style = document.createElement('style');
+    style.innerHTML = `
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        width: 100%;
+        overflow: hidden;
+        background: transparent;
+      }
+    `;
+    document.head.appendChild(style);
 
     this.iframe = document.createElement('iframe');
     this.iframe.src = `${config.iframeOrigin}/${config.module}`;
-    this.iframe.width = '100%';
-    this.iframe.height = config.height || '600';
-    this.iframe.sandbox = 'allow-scripts allow-same-origin';
+    this.iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+    this.iframe.setAttribute('scrolling', 'no');
+
+    Object.assign(this.iframe.style, {
+      border: 'none',
+      width: '100%',
+      height: '100vh',
+      margin: '0',
+      padding: '0',
+      display: 'block',
+      backgroundColor: 'transparent',
+    });
+
     this.iframe.onload = () => {
       this.sendToken();
       config.onLoad?.();
     };
-    this.iframe.onerror = () => config.onError?.(new Error('Iframe failed to load'));
+
+    this.iframe.onerror = () =>
+      config.onError?.(new Error('Iframe failed to load'));
+
     container.innerHTML = '';
     container.appendChild(this.iframe);
   }
@@ -35,7 +72,11 @@ class EmbedLoyaltyApp {
   private sendToken() {
     if (this.iframe?.contentWindow) {
       this.iframe.contentWindow.postMessage(
-        { type: 'AUTH_TOKEN', token: this.token },
+        {
+          type: 'AUTH_TOKEN',
+          token: this.token,
+          locale: this.locale
+        },
         this.origin
       );
     }
