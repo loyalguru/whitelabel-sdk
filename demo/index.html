@@ -11,11 +11,18 @@
   <script>
     EmbedLoyaltyApp.init({
       containerId: 'loyalty-container',
-      module: 'rewards',
-      iframeOrigin: 'white-label-domain',
-      token: 'your-jwt-here',
+      module: 'iframe.html',
+      iframeOrigin: 'http://127.0.0.1:64100',
+      token: 'INITIAL_TOKEN_123',
       locale: 'en',
-      onLoad: () => console.log('Iframe loaded')
+      onLoad: () => console.log('[host] Iframe loaded'),
+      onError: (err) => console.error('Loyalty iframe error', err)
+    });
+
+    EmbedLoyaltyApp.onTokenRefreshRequested(async () => {
+      console.log('[host] Refresh token requested...');
+      const newToken = 'refreshed_token_XYZ789';
+      EmbedLoyaltyApp.refreshToken(newToken);
     });
   </script>
 </body>

@@ -57,6 +57,15 @@
                 (_a = config.onLoad) === null || _a === void 0 ? void 0 : _a.call(config);
             };
             this.iframe.onerror = () => { var _a; return (_a = config.onError) === null || _a === void 0 ? void 0 : _a.call(config, new Error('Iframe failed to load')); };
+            // Escuchar mensajes desde el iframe
+            window.addEventListener('message', (event) => {
+                var _a, _b;
+                if (event.origin !== this.origin)
+                    return;
+                if (((_a = event.data) === null || _a === void 0 ? void 0 : _a.type) === 'REQUEST_NEW_TOKEN') {
+                    (_b = this.onTokenRefreshRequest) === null || _b === void 0 ? void 0 : _b.call(this);
+                }
+            });
             container.innerHTML = '';
             container.appendChild(this.iframe);
         }
@@ -66,13 +75,16 @@
                 this.iframe.contentWindow.postMessage({
                     type: 'AUTH_TOKEN',
                     token: this.token,
-                    locale: this.locale
+                    locale: this.locale,
                 }, this.origin);
             }
         }
         refreshToken(newToken) {
             this.token = newToken;
             this.sendToken();
+        }
+        onTokenRefreshRequested(callback) {
+            this.onTokenRefreshRequest = callback;
         }
         destroy() {
             var _a;

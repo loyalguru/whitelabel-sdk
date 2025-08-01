@@ -3,6 +3,7 @@ class EmbedLoyaltyApp {
   private origin: string = '';
   private token: string = '';
   private locale: string = 'en';
+  private onTokenRefreshRequest?: () => void;
 
   init(config: {
     containerId: string;
@@ -65,6 +66,14 @@ class EmbedLoyaltyApp {
     this.iframe.onerror = () =>
       config.onError?.(new Error('Iframe failed to load'));
 
+    // Escuchar mensajes desde el iframe
+    window.addEventListener('message', (event) => {
+      if (event.origin !== this.origin) return;
+      if (event.data?.type === 'REQUEST_NEW_TOKEN') {
+        this.onTokenRefreshRequest?.();
+      }
+    });
+
     container.innerHTML = '';
     container.appendChild(this.iframe);
   }
@@ -75,7 +84,7 @@ class EmbedLoyaltyApp {
         {
           type: 'AUTH_TOKEN',
           token: this.token,
-          locale: this.locale
+          locale: this.locale,
         },
         this.origin
       );
@@ -85,6 +94,10 @@ class EmbedLoyaltyApp {
   refreshToken(newToken: string) {
     this.token = newToken;
     this.sendToken();
+  }
+
+  onTokenRefreshRequested(callback: () => void) {
+    this.onTokenRefreshRequest = callback;
   }
 
   destroy() {
