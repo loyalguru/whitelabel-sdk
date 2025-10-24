@@ -24,26 +24,7 @@
             if (typeof config.onSize === 'function') {
                 this.onSizeCb = config.onSize;
             }
-            // Contenedor base
-            Object.assign(container.style, {
-                margin: '0',
-                padding: '0',
-                width: '100%',
-                backgroundColor: 'transparent',
-                border: 'none',
-            });
-            // ✅ Elimina overflow:hidden global (evitaba scroll del host)
-            const style = document.createElement('style');
-            style.innerHTML = `
-      html, body {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        background: transparent;
-      }
-    `;
-            document.head.appendChild(style);
-            // Crear iframe
+            //Iframe creation
             this.iframe = document.createElement('iframe');
             this.iframe.src = `${config.iframeOrigin}/${config.module}`;
             this.iframe.setAttribute('sandbox', [
@@ -54,7 +35,7 @@
             ].join(' '));
             this.iframe.setAttribute('allow', 'clipboard-read; clipboard-write');
             this.iframe.setAttribute('scrolling', 'no');
-            // Estilos del iframe
+            //Iframe sytles
             Object.assign(this.iframe.style, {
                 border: 'none',
                 width: '100%',
@@ -63,7 +44,7 @@
                 padding: '0',
                 display: 'block',
                 backgroundColor: 'transparent',
-                overflow: 'hidden', // scroll interno bloqueado, el host sí puede scrollar
+                overflow: 'hidden',
                 transition: 'height 0.25s ease'
             });
             this.iframe.onload = () => {
@@ -72,7 +53,7 @@
                 (_a = config.onLoad) === null || _a === void 0 ? void 0 : _a.call(config);
             };
             this.iframe.onerror = () => { var _a; return (_a = config.onError) === null || _a === void 0 ? void 0 : _a.call(config, new Error('Iframe failed to load')); };
-            // Escuchar mensajes del iframe
+            // Listeners: messages coming from iframe
             window.addEventListener('message', (event) => {
                 var _a, _b;
                 //if (event.origin !== this.origin) return;
@@ -80,11 +61,9 @@
                 if ((data === null || data === void 0 ? void 0 : data.type) === 'REQUEST_NEW_TOKEN') {
                     (_a = this.onTokenRefreshRequest) === null || _a === void 0 ? void 0 : _a.call(this);
                 }
-                // GTM passthrough
-                if ((data === null || data === void 0 ? void 0 : data.type) === 'LG_DATALAYER_EVENT' && (data === null || data === void 0 ? void 0 : data.payload)) {
+                if ((data === null || data === void 0 ? void 0 : data.type) === 'LG_DATALAYER_EVENT' && (data === null || data === void 0 ? void 0 : data.payload)) { //GTM 
                     window.dataLayer.push(data.payload);
                 }
-                // Altura dinámica
                 if ((data === null || data === void 0 ? void 0 : data.type) === 'SIZE') {
                     const msg = data;
                     const height = Number(msg.height) || 0;

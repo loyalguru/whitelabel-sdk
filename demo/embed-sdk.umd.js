@@ -24,7 +24,7 @@
             if (typeof config.onSize === 'function') {
                 this.onSizeCb = config.onSize;
             }
-          
+            //Iframe creation
             this.iframe = document.createElement('iframe');
             this.iframe.src = `${config.iframeOrigin}/${config.module}`;
             this.iframe.setAttribute('sandbox', [
@@ -35,7 +35,7 @@
             ].join(' '));
             this.iframe.setAttribute('allow', 'clipboard-read; clipboard-write');
             this.iframe.setAttribute('scrolling', 'no');
-            //AutoResize
+            //Iframe sytles
             Object.assign(this.iframe.style, {
                 border: 'none',
                 width: '100%',
@@ -43,8 +43,9 @@
                 margin: '0',
                 padding: '0',
                 display: 'block',
+                backgroundColor: 'transparent',
                 overflow: 'hidden',
-                backgroundColor: 'transparent'
+                transition: 'height 0.25s ease'
             });
             this.iframe.onload = () => {
                 var _a;
@@ -52,32 +53,27 @@
                 (_a = config.onLoad) === null || _a === void 0 ? void 0 : _a.call(config);
             };
             this.iframe.onerror = () => { var _a; return (_a = config.onError) === null || _a === void 0 ? void 0 : _a.call(config, new Error('Iframe failed to load')); };
-            //listening messages from iframe
+            // Listeners: messages coming from iframe
             window.addEventListener('message', (event) => {
                 var _a, _b;
-                //if (event.origin !== this.origin)
-                  //  return;
+                //if (event.origin !== this.origin) return;
                 const data = event.data;
                 if ((data === null || data === void 0 ? void 0 : data.type) === 'REQUEST_NEW_TOKEN') {
                     (_a = this.onTokenRefreshRequest) === null || _a === void 0 ? void 0 : _a.call(this);
                 }
-                // GTM passthrough
-                if ((data === null || data === void 0 ? void 0 : data.type) === 'LG_DATALAYER_EVENT' && (data === null || data === void 0 ? void 0 : data.payload)) {
+                if ((data === null || data === void 0 ? void 0 : data.type) === 'LG_DATALAYER_EVENT' && (data === null || data === void 0 ? void 0 : data.payload)) { //GTM 
                     window.dataLayer.push(data.payload);
                 }
-                // Dynamic Resize
                 if ((data === null || data === void 0 ? void 0 : data.type) === 'SIZE') {
                     const msg = data;
                     const height = Number(msg.height) || 0;
                     const width = Number(msg.width) || undefined;
-                    //if autoResize = true → apply to iframe
                     if (this.autoResize && this.iframe) {
                         const current = parseFloat(this.iframe.style.height) || 0;
                         if (Math.abs(current - height) > 1) {
                             this.iframe.style.height = `${height}px`;
                         }
                     }
-                    // Optional callback 
                     (_b = this.onSizeCb) === null || _b === void 0 ? void 0 : _b.call(this, { height, width, origin: event.origin });
                 }
             });
