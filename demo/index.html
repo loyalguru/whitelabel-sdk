@@ -11,19 +11,24 @@
   <script>
     EmbedLoyaltyApp.init({
       containerId: 'loyalty-container',
-      module: 'iframe.html',
-      iframeOrigin: 'http://127.0.0.1:64100',
-      token: 'INITIAL_TOKEN_123',
-      locale: 'en',
+      module: '',
+      iframeOrigin: 'http://localhost:4200',
+      token: 'eyJhbGciOiJIUzI1NiJ9.eyJjdXN0b21lcl9pZCI6IjMwNSIsImNvbXBhbnkiOiJwdWlnX3ByZSIsImV4cGlyZXNfYXQiOiIyMDI1LTA5LTMwVDEyOjQzOjAwOjAwWiJ9.3GZpHRcp4bzjeyIB8yIz2eR4MeyD3M3Uxqwxs5iwgOM',
+      locale: 'fr',
+      autoResize: false,
       onLoad: () => console.log('[host] Iframe loaded'),
+      onSize: ({ height }) => console.log('[host] iframe height:', height),
       onError: (err) => console.error('Loyalty iframe error', err)
     });
 
     EmbedLoyaltyApp.onTokenRefreshRequested(async () => {
-      console.log('[host] Refresh token requested...');
-      const newToken = 'refreshed_token_XYZ789';
+      const newToken ='eyJhbGciOiJIUzI1NiJ9.eyJjdXN0b21lcl9pZCI6IjMwNSIsImNvbXBhbnkiOiJwdWlnX3ByZSIsImV4cGlyZXNfYXQiOiIyMDI1LTEwLTMwVDEyOjQzOjAwOjAwWiJ9.eqQ8aCPmJvnDO7PkG0yxFn11D3s-YYh3EiQrlOYgq4o';
       EmbedLoyaltyApp.refreshToken(newToken);
+      console.log('REFRESH TOKEN SDK')
     });
+    EmbedLoyaltyApp.onSizeRequested(({ height, width }) => {
+    //console.log('[host] SIZE via onSizeRequested =>', height, width);
+  });
   </script>
 </body>
 </html>
