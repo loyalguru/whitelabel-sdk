@@ -3,6 +3,7 @@
 <head>
   <title>Test SDK</title>
   <script src="embed-sdk.umd.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
   <div id="loyalty-container"></div>
@@ -10,11 +11,25 @@
   <script>
     EmbedLoyaltyApp.init({
       containerId: 'loyalty-container',
-      module: 'iframe.html',
-      iframeOrigin: 'http://localhost:64100',
-      token: 'your-jwt-here',
-      onLoad: () => console.log('Iframe loaded')
+      module: '',
+      iframeOrigin: 'http://localhost:4200',
+      //token: 'eyJhbGciOiJIUzI1NiJ9.eyJjdXN0b21lcl9pZCI6IjIwMSIsImNvbXBhbnkiOiJwdWlnX3ByZSIsImV4cGlyZXNfYXQiOiIyMDI1LTExLTMwVDEyOjQzOjAwOjAwWiJ9.6L1-ZbQCIzoTczQqmaOz1NSrb0v5PV82Yf6VO70Mm50',
+      token: 'eyJhbGciOiJIUzI1NiJ9.eyJjdXN0b21lcl9pZCI6IjQyMiIsImNvbXBhbnkiOiJwdWlnX3ByZSIsImV4cGlyZXNfYXQiOiIyMDI1LTExLTMwVDEyOjQzOjAwOjAwWiJ9.h5itniD1uBeUS5jgghlCKJuOFD5OGGPZdvjeSU7TIZ4',
+      locale: 'fr',
+      autoResize: false,
+      onLoad: () => console.log('[host] Iframe loaded'),
+      onSize: ({ height }) => console.log('[host] iframe height:', height),
+      onError: (err) => console.error('Loyalty iframe error', err)
     });
+
+    EmbedLoyaltyApp.onTokenRefreshRequested(async () => {
+      const newToken ='eyJhbGciOiJIUzI1NiJ9.eyJjdXN0b21lcl9pZCI6IjIwMSIsImNvbXBhbnkiOiJwdWlnX3ByZSIsImV4cGlyZXNfYXQiOiIyMDI1LTExLTMwVDEyOjQzOjAwOjAwWiJ9.6L1-ZbQCIzoTczQqmaOz1NSrb0v5PV82Yf6VO70Mm50';
+      EmbedLoyaltyApp.refreshToken(newToken);
+      console.log('REFRESH TOKEN SDK')
+    });
+    EmbedLoyaltyApp.onSizeRequested(({ height, width }) => {
+    console.log('[host] SIZE via onSizeRequested =>', height, width);
+  });
   </script>
 </body>
 </html>
