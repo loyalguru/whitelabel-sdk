@@ -13,7 +13,8 @@
       containerId: 'loyalty-container',
       module: '',
       iframeOrigin: 'http://localhost:4200',
-      token: 'eyJhbGciOiJIUzI1NiJ9.eyJjdXN0b21lcl9pZCI6IjMwNSIsImNvbXBhbnkiOiJwdWlnX3ByZSIsImV4cGlyZXNfYXQiOiIyMDI1LTA5LTMwVDEyOjQzOjAwOjAwWiJ9.3GZpHRcp4bzjeyIB8yIz2eR4MeyD3M3Uxqwxs5iwgOM',
+      //token: 'eyJhbGciOiJIUzI1NiJ9.eyJjdXN0b21lcl9pZCI6IjIwMSIsImNvbXBhbnkiOiJwdWlnX3ByZSIsImV4cGlyZXNfYXQiOiIyMDI1LTExLTMwVDEyOjQzOjAwOjAwWiJ9.6L1-ZbQCIzoTczQqmaOz1NSrb0v5PV82Yf6VO70Mm50',
+      token: 'eyJhbGciOiJIUzI1NiJ9.eyJjdXN0b21lcl9pZCI6IjQyMiIsImNvbXBhbnkiOiJwdWlnX3ByZSIsImV4cGlyZXNfYXQiOiIyMDI1LTExLTMwVDEyOjQzOjAwOjAwWiJ9.h5itniD1uBeUS5jgghlCKJuOFD5OGGPZdvjeSU7TIZ4',
       locale: 'fr',
       autoResize: false,
       onLoad: () => console.log('[host] Iframe loaded'),
@@ -22,12 +23,12 @@
     });
 
     EmbedLoyaltyApp.onTokenRefreshRequested(async () => {
-      const newToken ='eyJhbGciOiJIUzI1NiJ9.eyJjdXN0b21lcl9pZCI6IjMwNSIsImNvbXBhbnkiOiJwdWlnX3ByZSIsImV4cGlyZXNfYXQiOiIyMDI1LTEwLTMwVDEyOjQzOjAwOjAwWiJ9.eqQ8aCPmJvnDO7PkG0yxFn11D3s-YYh3EiQrlOYgq4o';
+      const newToken ='eyJhbGciOiJIUzI1NiJ9.eyJjdXN0b21lcl9pZCI6IjIwMSIsImNvbXBhbnkiOiJwdWlnX3ByZSIsImV4cGlyZXNfYXQiOiIyMDI1LTExLTMwVDEyOjQzOjAwOjAwWiJ9.6L1-ZbQCIzoTczQqmaOz1NSrb0v5PV82Yf6VO70Mm50';
       EmbedLoyaltyApp.refreshToken(newToken);
       console.log('REFRESH TOKEN SDK')
     });
     EmbedLoyaltyApp.onSizeRequested(({ height, width }) => {
-    //console.log('[host] SIZE via onSizeRequested =>', height, width);
+    console.log('[host] SIZE via onSizeRequested =>', height, width);
   });
   </script>
 </body>

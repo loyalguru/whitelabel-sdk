@@ -25,6 +25,26 @@
                 this.onSizeCb = config.onSize;
             }
             //Iframe creation
+                   /*Object.assign(container.style, {
+                margin: '0',
+                padding: '0',
+                height: '100vh',
+                width: '100%',
+                backgroundColor: 'transparent',
+                border: 'none',
+            });
+            const style = document.createElement('style');
+            style.innerHTML = `
+                html, body {
+                    margin: 0;
+                    padding: 0;
+                    height: 100vh;
+                    width: 100%;
+                    overflow: hidden;
+                    background: transparent;
+                }
+                `;
+            document.head.appendChild(style);*/
             this.iframe = document.createElement('iframe');
             this.iframe.src = `${config.iframeOrigin}/${config.module}`;
             this.iframe.setAttribute('sandbox', [
@@ -45,7 +65,8 @@
                 display: 'block',
                 backgroundColor: 'transparent',
                 overflow: 'hidden',
-                transition: 'height 0.25s ease'
+                transition: 'height 0.25s ease',
+                'max-height': '100vh'
             });
             this.iframe.onload = () => {
                 var _a;

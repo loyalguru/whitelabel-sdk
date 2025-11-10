@@ -66,7 +66,8 @@ class EmbedLoyaltyApp {
       display: 'block',
       backgroundColor: 'transparent',
       overflow: 'hidden', 
-      transition: 'height 0.25s ease'
+      transition: 'height 0.25s ease',
+      'max-height': '100vh'
     });
 
     this.iframe.onload = () => {
