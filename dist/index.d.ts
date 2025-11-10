@@ -1,20 +1,5 @@
-declare class EmbedLoyaltyApp {
-    private iframe;
-    private origin;
-    private token;
-    private locale;
-    init(config: {
-        containerId: string;
-        module: 'loyalty' | 'cdp' | 'coupons' | 'login';
-        iframeOrigin: string;
-        token: string;
-        locale?: string;
-        onLoad?: () => void;
-        onError?: (e: Error) => void;
-    }): void;
-    private sendToken;
-    refreshToken(newToken: string): void;
-    destroy(): void;
-}
-declare const _default: EmbedLoyaltyApp;
-export default _default;
+import { embedLoyaltyApp } from './embed-loyalty-app';
+export default embedLoyaltyApp;
+export * from './types/types';
+export * from './types/messages-types';
+export * from './types/errors';
