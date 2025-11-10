@@ -1,8 +1,70 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-    typeof define === 'function' && define.amd ? define(factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.EmbedLoyaltyApp = factory());
-})(this, (function () { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+    typeof define === 'function' && define.amd ? define(['exports'], factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.EmbedLoyaltyApp = {}));
+})(this, (function (exports) { 'use strict';
+
+    //Messages: iframe -> SDK
+    const MSG_REQUEST_NEW_TOKEN = 'REQUEST_NEW_TOKEN';
+    const MSG_DATALAYER_EVENT = 'LG_DATALAYER_EVENT';
+    const MSG_SIZE = 'SIZE';
+    //Messages: SDK -> iframe
+    const MSG_AUTH_TOKEN = 'AUTH_TOKEN';
+
+    // SDK internal codes
+    const SDK_ERROR_CODES = {
+        CONTAINER_NOT_FOUND: 'CONTAINER_NOT_FOUND',
+        IFRAME_LOAD_FAILED: 'IFRAME_LOAD_FAILED',
+    };
+    //Messages english by default
+    const SDK_ERROR_MESSAGES = {
+        [SDK_ERROR_CODES.CONTAINER_NOT_FOUND]: 'Container not found',
+        [SDK_ERROR_CODES.IFRAME_LOAD_FAILED]: 'Iframe failed to load',
+    };
+    function createSdkError(code) {
+        var _a;
+        const msg = (_a = SDK_ERROR_MESSAGES[code]) !== null && _a !== void 0 ? _a : 'Unexpected SDK error';
+        const err = new Error(msg);
+        err.code = code;
+        return err;
+    }
+
+    //Sandbox allowed attributes
+    const IFRAME_SANDBOX_ATTRS = [
+        'allow-scripts',
+        'allow-same-origin',
+        'allow-popups',
+        'allow-popups-to-escape-sandbox',
+    ];
+    //Other attrs
+    const IFRAME_ALLOW_ATTR = 'clipboard-read; clipboard-write';
+    const IFRAME_SCROLLING_ATTR = 'no';
+    //Common base styles and all iframes of the SDK
+    const IFRAME_BASE_STYLES = {
+        border: 'none',
+        width: '100%',
+        margin: '0',
+        padding: '0',
+        display: 'block',
+        backgroundColor: 'transparent',
+        overflow: 'hidden',
+        transition: 'height 0.25s ease',
+        maxHeight: '100vh',
+    };
+
+    function createIframe(config, autoResize) {
+        const iframe = document.createElement('iframe');
+        iframe.src = `${config.iframeOrigin}/${config.module}`;
+        //Attrs
+        iframe.setAttribute('sandbox', IFRAME_SANDBOX_ATTRS.join(' '));
+        iframe.setAttribute('allow', IFRAME_ALLOW_ATTR);
+        iframe.setAttribute('scrolling', IFRAME_SCROLLING_ATTR);
+        //Styles
+        Object.assign(iframe.style, IFRAME_BASE_STYLES, {
+            height: autoResize ? '0px' : '100vh',
+        });
+        return iframe;
+    }
 
     class EmbedLoyaltyApp {
         constructor() {
@@ -11,11 +73,36 @@
             this.token = '';
             this.locale = 'en';
             this.autoResize = false;
+            this.handleMessage = (event) => {
+                var _a, _b;
+                const data = event.data;
+                if (!data || typeof data !== 'object')
+                    return;
+                // if (event.origin !== this.origin) return; // Activate to validate origin
+                switch (data.type) {
+                    case MSG_REQUEST_NEW_TOKEN: {
+                        (_a = this.onTokenRefreshRequest) === null || _a === void 0 ? void 0 : _a.call(this);
+                        break;
+                    }
+                    case MSG_DATALAYER_EVENT: {
+                        window.dataLayer.push(data.payload);
+                        break;
+                    }
+                    case MSG_SIZE: {
+                        const msg = data;
+                        const height = Number(msg.height) || 0;
+                        const width = Number(msg.width) || undefined;
+                        this.applyAutoResize(height);
+                        (_b = this.onSizeCb) === null || _b === void 0 ? void 0 : _b.call(this, { height, width, origin: event.origin });
+                        break;
+                    }
+                }
+            };
         }
         init(config) {
             const container = document.getElementById(config.containerId);
             if (!container)
-                throw new Error('Container not found');
+                throw createSdkError(SDK_ERROR_CODES.CONTAINER_NOT_FOUND);
             window.dataLayer = window.dataLayer || [];
             this.origin = config.iframeOrigin;
             this.token = config.token;
@@ -24,92 +111,39 @@
             if (typeof config.onSize === 'function') {
                 this.onSizeCb = config.onSize;
             }
-            //Iframe creation
-                   /*Object.assign(container.style, {
-                margin: '0',
-                padding: '0',
-                height: '100vh',
-                width: '100%',
-                backgroundColor: 'transparent',
-                border: 'none',
-            });
-            const style = document.createElement('style');
-            style.innerHTML = `
-                html, body {
-                    margin: 0;
-                    padding: 0;
-                    height: 100vh;
-                    width: 100%;
-                    overflow: hidden;
-                    background: transparent;
-                }
-                `;
-            document.head.appendChild(style);*/
-            this.iframe = document.createElement('iframe');
-            this.iframe.src = `${config.iframeOrigin}/${config.module}`;
-            this.iframe.setAttribute('sandbox', [
-                'allow-scripts',
-                'allow-same-origin',
-                'allow-popups',
-                'allow-popups-to-escape-sandbox'
-            ].join(' '));
-            this.iframe.setAttribute('allow', 'clipboard-read; clipboard-write');
-            this.iframe.setAttribute('scrolling', 'no');
-            //Iframe sytles
-            Object.assign(this.iframe.style, {
-                border: 'none',
-                width: '100%',
-                height: this.autoResize ? '0px' : '100vh',
-                margin: '0',
-                padding: '0',
-                display: 'block',
-                backgroundColor: 'transparent',
-                overflow: 'hidden',
-                transition: 'height 0.25s ease',
-                'max-height': '100vh'
-            });
-            this.iframe.onload = () => {
+            const iframe = createIframe(config, this.autoResize);
+            iframe.onload = () => {
                 var _a;
                 this.sendToken();
                 (_a = config.onLoad) === null || _a === void 0 ? void 0 : _a.call(config);
             };
-            this.iframe.onerror = () => { var _a; return (_a = config.onError) === null || _a === void 0 ? void 0 : _a.call(config, new Error('Iframe failed to load')); };
-            // Listeners: messages coming from iframe
-            window.addEventListener('message', (event) => {
-                var _a, _b;
-                //if (event.origin !== this.origin) return;
-                const data = event.data;
-                if ((data === null || data === void 0 ? void 0 : data.type) === 'REQUEST_NEW_TOKEN') {
-                    (_a = this.onTokenRefreshRequest) === null || _a === void 0 ? void 0 : _a.call(this);
-                }
-                if ((data === null || data === void 0 ? void 0 : data.type) === 'LG_DATALAYER_EVENT' && (data === null || data === void 0 ? void 0 : data.payload)) { //GTM 
-                    window.dataLayer.push(data.payload);
-                }
-                if ((data === null || data === void 0 ? void 0 : data.type) === 'SIZE') {
-                    const msg = data;
-                    const height = Number(msg.height) || 0;
-                    const width = Number(msg.width) || undefined;
-                    if (this.autoResize && this.iframe) {
-                        const current = parseFloat(this.iframe.style.height) || 0;
-                        if (Math.abs(current - height) > 1) {
-                            this.iframe.style.height = `${height}px`;
-                        }
-                    }
-                    (_b = this.onSizeCb) === null || _b === void 0 ? void 0 : _b.call(this, { height, width, origin: event.origin });
-                }
-            });
+            iframe.onerror = () => {
+                var _a;
+                (_a = config.onError) === null || _a === void 0 ? void 0 : _a.call(config, createSdkError(SDK_ERROR_CODES.IFRAME_LOAD_FAILED));
+            };
+            window.addEventListener('message', this.handleMessage);
             container.innerHTML = '';
-            container.appendChild(this.iframe);
+            container.appendChild(iframe);
+            this.iframe = iframe;
+        }
+        applyAutoResize(nextHeight) {
+            if (!this.autoResize || !this.iframe)
+                return;
+            const current = parseFloat(this.iframe.style.height) || 0;
+            if (Math.abs(current - nextHeight) > 1) {
+                this.iframe.style.height = `${nextHeight}px`;
+            }
         }
         sendToken() {
             var _a;
-            if ((_a = this.iframe) === null || _a === void 0 ? void 0 : _a.contentWindow) {
-                this.iframe.contentWindow.postMessage({
-                    type: 'AUTH_TOKEN',
-                    token: this.token,
-                    locale: this.locale,
-                }, this.origin);
-            }
+            if (!((_a = this.iframe) === null || _a === void 0 ? void 0 : _a.contentWindow))
+                return;
+            const message = {
+                type: MSG_AUTH_TOKEN,
+                token: this.token,
+                locale: this.locale,
+            };
+            this.iframe.contentWindow.postMessage(message, this.origin);
         }
         refreshToken(newToken) {
             this.token = newToken;
@@ -123,12 +157,26 @@
         }
         destroy() {
             var _a;
+            window.removeEventListener('message', this.handleMessage);
             (_a = this.iframe) === null || _a === void 0 ? void 0 : _a.remove();
             this.iframe = null;
         }
     }
-    var index = new EmbedLoyaltyApp();
+    const embedLoyaltyApp = new EmbedLoyaltyApp();
 
-    return index;
+    if (typeof window !== 'undefined') {
+        window.EmbedLoyaltyApp = embedLoyaltyApp;
+    }
+
+    exports.MSG_AUTH_TOKEN = MSG_AUTH_TOKEN;
+    exports.MSG_DATALAYER_EVENT = MSG_DATALAYER_EVENT;
+    exports.MSG_REQUEST_NEW_TOKEN = MSG_REQUEST_NEW_TOKEN;
+    exports.MSG_SIZE = MSG_SIZE;
+    exports.SDK_ERROR_CODES = SDK_ERROR_CODES;
+    exports.SDK_ERROR_MESSAGES = SDK_ERROR_MESSAGES;
+    exports.createSdkError = createSdkError;
+    exports.default = embedLoyaltyApp;
+
+    Object.defineProperty(exports, '__esModule', { value: true });
 
 }));

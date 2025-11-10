@@ -7,7 +7,8 @@ export default {
   output: {
     file: 'dist/embed-sdk.umd.js',
     format: 'umd',
-    name: 'EmbedLoyaltyApp'
+    name: 'EmbedLoyaltyApp',
+    exports: 'named'
   },
   plugins: [resolve(), commonjs(), typescript()]
 };
