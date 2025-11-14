@@ -25,7 +25,7 @@
       onServerError: (serverError) => console.warn('[SDK] server error', serverError)
     });
 
-    EmbedLoyaltyApp.onTokenRefreshRequested(async () => {console.log('REFRESH TOKEN')
+    EmbedLoyaltyApp.onTokenRefreshRequested(async () => {
       const newToken = config.token;
       EmbedLoyaltyApp.refreshToken(newToken);
     });
