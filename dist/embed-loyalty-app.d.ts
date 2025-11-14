@@ -7,6 +7,8 @@ declare class EmbedLoyaltyApp {
     private onTokenRefreshRequest?;
     private onSizeCb?;
     private autoResize;
+    private onServerErrorCb?;
+    private onErrorCb?;
     init(config: InitConfig): void;
     private handleMessage;
     private applyAutoResize;

@@ -21,10 +21,11 @@
       autoResize: config.autoResize,
       onLoad: () => console.log('[host] Iframe loaded'),
       onSize: ({ height }) => console.log('[host] iframe height:', height),
-      onError: (err) => console.error('Loyalty iframe error', err)
+      onError: (err) => console.error('[SDK] error', err),
+      onServerError: (serverError) => console.warn('[SDK] server error', serverError)
     });
 
-    EmbedLoyaltyApp.onTokenRefreshRequested(async () => {
+    EmbedLoyaltyApp.onTokenRefreshRequested(async () => {console.log('REFRESH TOKEN')
       const newToken = config.token;
       EmbedLoyaltyApp.refreshToken(newToken);
     });

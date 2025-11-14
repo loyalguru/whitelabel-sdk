@@ -1,4 +1,4 @@
-import { MSG_REQUEST_NEW_TOKEN, MSG_DATALAYER_EVENT, MSG_SIZE, MSG_AUTH_TOKEN, } from './messages-types';
+import { MSG_REQUEST_NEW_TOKEN, MSG_DATALAYER_EVENT, MSG_SIZE, MSG_AUTH_TOKEN, MSG_SERVER_ERRORS, } from './messages-types';
 
 export type EmbedModule = 'loyalty' | 'cdp' | 'coupons' | 'login';
 
@@ -17,10 +17,25 @@ export type SizeMessage = {
   width?: number;
 };
 
+export type ServerErrorPayload = {
+  status: number;
+  url?: string | null;
+  message: string;
+  errorCode?: string | null;
+  errorBody?: unknown;
+  ts: number;
+};
+
+export type ServerErrorMessage = {
+  type: typeof MSG_SERVER_ERRORS;
+  payload: ServerErrorPayload;
+};
+
 export type IncomingMessage =
   | RequestNewTokenMessage
   | DataLayerMessage
-  | SizeMessage;
+  | SizeMessage
+  | ServerErrorMessage; 
 
 export type AuthTokenMessage = {
   type: typeof MSG_AUTH_TOKEN;
@@ -46,4 +61,6 @@ export type InitConfig = {
   onError?: (e: Error) => void;
   onSize?: (payload: OnSizePayload) => void;
   autoResize?: boolean;
+  onServerError?: (payload: ServerErrorPayload) => void;
+  onTokenRefresh?: () => void;
 };
