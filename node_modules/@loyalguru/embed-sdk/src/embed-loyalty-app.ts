@@ -4,12 +4,14 @@ import {
   SizeMessage,
   OnSizePayload,
   OutgoingMessage,
+  ServerErrorPayload,
 } from './types/types';
 import {
   MSG_REQUEST_NEW_TOKEN,
   MSG_DATALAYER_EVENT,
   MSG_SIZE,
   MSG_AUTH_TOKEN,
+  MSG_SERVER_ERRORS,
 } from './types/messages-types';
 
 import { createSdkError, SDK_ERROR_CODES } from './types/errors';
@@ -23,6 +25,8 @@ class EmbedLoyaltyApp {
   private onTokenRefreshRequest?: () => void;
   private onSizeCb?: (payload: OnSizePayload) => void;
   private autoResize = false;
+  private onServerErrorCb?: (payload: ServerErrorPayload) => void;
+  private onErrorCb?: (e: Error) => void;
 
   init(config: InitConfig) {
     const container = document.getElementById(config.containerId);
@@ -39,6 +43,18 @@ class EmbedLoyaltyApp {
       this.onSizeCb = config.onSize;
     }
 
+    if (typeof config.onTokenRefresh=== 'function') {
+      this.onTokenRefreshRequest = config.onTokenRefresh;
+    }
+
+    if (typeof config.onServerError === 'function') {
+      this.onServerErrorCb = config.onServerError;
+    }
+
+    if (typeof config.onError === 'function') {
+      this.onErrorCb = config.onError;
+    }
+
     const iframe = createIframe(config, this.autoResize);
 
     iframe.onload = () => {
@@ -47,7 +63,7 @@ class EmbedLoyaltyApp {
     };
 
     iframe.onerror = () => {
-      config.onError?.(createSdkError(SDK_ERROR_CODES.IFRAME_LOAD_FAILED));
+      this.onErrorCb?.(createSdkError(SDK_ERROR_CODES.IFRAME_LOAD_FAILED));
     };
 
     window.addEventListener('message', this.handleMessage);
@@ -80,6 +96,18 @@ class EmbedLoyaltyApp {
         const width = Number(msg.width) || undefined;
         this.applyAutoResize(height);
         this.onSizeCb?.({ height, width, origin: event.origin });
+        break;
+      }
+
+      case MSG_SERVER_ERRORS: {
+        if (this.onServerErrorCb) {
+          this.onServerErrorCb(data.payload);
+        } else if (this.onErrorCb) {
+          const err = new Error(
+            `Server error ${data.payload.status}: ${data.payload.message}`
+          );
+          this.onErrorCb(err);
+        }
         break;
       }
     }

@@ -10,6 +10,7 @@
     const MSG_SIZE = 'SIZE';
     //Messages: SDK -> iframe
     const MSG_AUTH_TOKEN = 'AUTH_TOKEN';
+    const MSG_SERVER_ERRORS = 'SERVER_ERRORS';
 
     // SDK internal codes
     const SDK_ERROR_CODES = {
@@ -96,6 +97,16 @@
                         (_b = this.onSizeCb) === null || _b === void 0 ? void 0 : _b.call(this, { height, width, origin: event.origin });
                         break;
                     }
+                    case MSG_SERVER_ERRORS: {
+                        if (this.onServerErrorCb) {
+                            this.onServerErrorCb(data.payload);
+                        }
+                        else if (this.onErrorCb) {
+                            const err = new Error(`Server error ${data.payload.status}: ${data.payload.message}`);
+                            this.onErrorCb(err);
+                        }
+                        break;
+                    }
                 }
             };
         }
@@ -111,6 +122,15 @@
             if (typeof config.onSize === 'function') {
                 this.onSizeCb = config.onSize;
             }
+            if (typeof config.onTokenRefresh === 'function') {
+                this.onTokenRefreshRequest = config.onTokenRefresh;
+            }
+            if (typeof config.onServerError === 'function') {
+                this.onServerErrorCb = config.onServerError;
+            }
+            if (typeof config.onError === 'function') {
+                this.onErrorCb = config.onError;
+            }
             const iframe = createIframe(config, this.autoResize);
             iframe.onload = () => {
                 var _a;
@@ -119,7 +139,7 @@
             };
             iframe.onerror = () => {
                 var _a;
-                (_a = config.onError) === null || _a === void 0 ? void 0 : _a.call(config, createSdkError(SDK_ERROR_CODES.IFRAME_LOAD_FAILED));
+                (_a = this.onErrorCb) === null || _a === void 0 ? void 0 : _a.call(this, createSdkError(SDK_ERROR_CODES.IFRAME_LOAD_FAILED));
             };
             window.addEventListener('message', this.handleMessage);
             container.innerHTML = '';
@@ -171,6 +191,7 @@
     exports.MSG_AUTH_TOKEN = MSG_AUTH_TOKEN;
     exports.MSG_DATALAYER_EVENT = MSG_DATALAYER_EVENT;
     exports.MSG_REQUEST_NEW_TOKEN = MSG_REQUEST_NEW_TOKEN;
+    exports.MSG_SERVER_ERRORS = MSG_SERVER_ERRORS;
     exports.MSG_SIZE = MSG_SIZE;
     exports.SDK_ERROR_CODES = SDK_ERROR_CODES;
     exports.SDK_ERROR_MESSAGES = SDK_ERROR_MESSAGES;
