@@ -4,6 +4,7 @@ declare class EmbedLoyaltyApp {
     private origin;
     private token;
     private locale;
+    private module;
     private onTokenRefreshRequest?;
     private onSizeCb?;
     private autoResize;

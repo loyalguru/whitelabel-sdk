@@ -22,6 +22,7 @@ class EmbedLoyaltyApp {
   private origin = '';
   private token = '';
   private locale = 'en';
+  private module = '';
   private onTokenRefreshRequest?: () => void;
   private onSizeCb?: (payload: OnSizePayload) => void;
   private autoResize = false;
@@ -37,6 +38,7 @@ class EmbedLoyaltyApp {
     this.origin = config.iframeOrigin;
     this.token = config.token;
     this.locale = config.locale || 'en';
+    this.module = config.module ?? '';
     this.autoResize = !!config.autoResize;
 
     if (typeof config.onSize === 'function') {
@@ -128,6 +130,7 @@ class EmbedLoyaltyApp {
       type: MSG_AUTH_TOKEN,
       token: this.token,
       locale: this.locale,
+      module: this.module
     };
 
     this.iframe.contentWindow.postMessage(message, this.origin);
