@@ -29,6 +29,7 @@ export type AuthTokenMessage = {
     type: typeof MSG_AUTH_TOKEN;
     token: string;
     locale: string;
+    module?: string;
 };
 export type OutgoingMessage = AuthTokenMessage;
 export type OnSizePayload = {

@@ -55,7 +55,7 @@
 
     function createIframe(config, autoResize) {
         const iframe = document.createElement('iframe');
-        iframe.src = `${config.iframeOrigin}/${config.module}`;
+        iframe.src = `${config.iframeOrigin}`;
         //Attrs
         iframe.setAttribute('sandbox', IFRAME_SANDBOX_ATTRS.join(' '));
         iframe.setAttribute('allow', IFRAME_ALLOW_ATTR);
@@ -73,6 +73,7 @@
             this.origin = '';
             this.token = '';
             this.locale = 'en';
+            this.module = '';
             this.autoResize = false;
             this.handleMessage = (event) => {
                 var _a, _b;
@@ -111,6 +112,7 @@
             };
         }
         init(config) {
+            var _a;
             const container = document.getElementById(config.containerId);
             if (!container)
                 throw createSdkError(SDK_ERROR_CODES.CONTAINER_NOT_FOUND);
@@ -118,6 +120,7 @@
             this.origin = config.iframeOrigin;
             this.token = config.token;
             this.locale = config.locale || 'en';
+            this.module = (_a = config.module) !== null && _a !== void 0 ? _a : '';
             this.autoResize = !!config.autoResize;
             if (typeof config.onSize === 'function') {
                 this.onSizeCb = config.onSize;
@@ -162,6 +165,7 @@
                 type: MSG_AUTH_TOKEN,
                 token: this.token,
                 locale: this.locale,
+                module: this.module
             };
             this.iframe.contentWindow.postMessage(message, this.origin);
         }
