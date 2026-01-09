@@ -9,7 +9,7 @@ import {
 export function createIframe(config: InitConfig, autoResize: boolean): HTMLIFrameElement {
   const iframe = document.createElement('iframe');
 
-  iframe.src = `${config.iframeOrigin}/${config.module}`;
+  iframe.src = `${config.iframeOrigin}`;
 
   //Attrs
   iframe.setAttribute('sandbox', IFRAME_SANDBOX_ATTRS.join(' '));

@@ -55,7 +55,7 @@
 
     function createIframe(config, autoResize) {
         const iframe = document.createElement('iframe');
-        iframe.src = `${config.iframeOrigin}/${config.module}`;
+        iframe.src = `${config.iframeOrigin}`;
         //Attrs
         iframe.setAttribute('sandbox', IFRAME_SANDBOX_ATTRS.join(' '));
         iframe.setAttribute('allow', IFRAME_ALLOW_ATTR);
