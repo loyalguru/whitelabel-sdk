@@ -26,7 +26,7 @@
     });
 
     EmbedLoyaltyApp.onTokenRefreshRequested(async () => {
-      const newToken = config.token;
+      const newToken = 'eyJhbGciOiJIUzI1NiJ9.eyJjdXN0b21lcl9pZCI6IjIwIiwiY29tcGFueSI6InBhbGFjaW9fZGV2IiwiZXhwaXJlc19hdCI6IjIwMjYtMTItMzBUMTI6NDM6MDA6MDBaIn0.6dOJZRHSsAQi4-fRF1dufgyHYubEkX9RH518RX4BZiQ';
       EmbedLoyaltyApp.refreshToken(newToken);
     });
     EmbedLoyaltyApp.onSizeRequested(({ height, width }) => {});
