@@ -5,6 +5,7 @@ import {
   OnSizePayload,
   OutgoingMessage,
   ServerErrorPayload,
+  OnDataPayload,  
 } from './types/types';
 import {
   MSG_REQUEST_NEW_TOKEN,
@@ -12,6 +13,7 @@ import {
   MSG_SIZE,
   MSG_AUTH_TOKEN,
   MSG_SERVER_ERRORS,
+  MSG_DATA,  
 } from './types/messages-types';
 
 import { createSdkError, SDK_ERROR_CODES } from './types/errors';
@@ -28,6 +30,7 @@ class EmbedLoyaltyApp {
   private autoResize = false;
   private onServerErrorCb?: (payload: ServerErrorPayload) => void;
   private onErrorCb?: (e: Error) => void;
+  private onDataCb?: (payload: OnDataPayload) => void;
 
   init(config: InitConfig) {
     const container = document.getElementById(config.containerId);
@@ -55,6 +58,10 @@ class EmbedLoyaltyApp {
 
     if (typeof config.onError === 'function') {
       this.onErrorCb = config.onError;
+    }
+
+    if (typeof config.onData === 'function') {
+      this.onDataCb = config.onData;
     }
 
     const iframe = createIframe(config, this.autoResize);
@@ -112,6 +119,12 @@ class EmbedLoyaltyApp {
         }
         break;
       }
+
+      case MSG_DATA: {
+        const payload = (data as any).payload;
+        this.onDataCb?.({ payload, origin: event.origin });
+        break;
+      }
     }
   };
 
@@ -147,6 +160,10 @@ class EmbedLoyaltyApp {
 
   onSizeRequested(callback: (payload: OnSizePayload) => void) {
     this.onSizeCb = callback;
+  }
+
+  onDataRequested(callback: (payload: OnDataPayload) => void) {
+    this.onDataCb = callback;
   }
 
   destroy() {

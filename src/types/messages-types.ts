@@ -7,3 +7,4 @@ export const MSG_SIZE = 'SIZE' as const;
 export const MSG_AUTH_TOKEN = 'AUTH_TOKEN' as const;
 
 export const MSG_SERVER_ERRORS     = 'SERVER_ERRORS';
+export const MSG_DATA = 'DATA';
