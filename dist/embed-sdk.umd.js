@@ -11,6 +11,7 @@
     //Messages: SDK -> iframe
     const MSG_AUTH_TOKEN = 'AUTH_TOKEN';
     const MSG_SERVER_ERRORS = 'SERVER_ERRORS';
+    const MSG_DATA = 'DATA';
 
     // SDK internal codes
     const SDK_ERROR_CODES = {
@@ -76,7 +77,7 @@
             this.module = '';
             this.autoResize = false;
             this.handleMessage = (event) => {
-                var _a, _b;
+                var _a, _b, _c;
                 const data = event.data;
                 if (!data || typeof data !== 'object')
                     return;
@@ -108,6 +109,11 @@
                         }
                         break;
                     }
+                    case MSG_DATA: {
+                        const payload = data.payload;
+                        (_c = this.onDataCb) === null || _c === void 0 ? void 0 : _c.call(this, { payload, origin: event.origin });
+                        break;
+                    }
                 }
             };
         }
@@ -133,6 +139,9 @@
             }
             if (typeof config.onError === 'function') {
                 this.onErrorCb = config.onError;
+            }
+            if (typeof config.onData === 'function') {
+                this.onDataCb = config.onData;
             }
             const iframe = createIframe(config, this.autoResize);
             iframe.onload = () => {
@@ -179,6 +188,9 @@
         onSizeRequested(callback) {
             this.onSizeCb = callback;
         }
+        onDataRequested(callback) {
+            this.onDataCb = callback;
+        }
         destroy() {
             var _a;
             window.removeEventListener('message', this.handleMessage);
@@ -193,6 +205,7 @@
     }
 
     exports.MSG_AUTH_TOKEN = MSG_AUTH_TOKEN;
+    exports.MSG_DATA = MSG_DATA;
     exports.MSG_DATALAYER_EVENT = MSG_DATALAYER_EVENT;
     exports.MSG_REQUEST_NEW_TOKEN = MSG_REQUEST_NEW_TOKEN;
     exports.MSG_SERVER_ERRORS = MSG_SERVER_ERRORS;

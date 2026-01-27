@@ -21,6 +21,7 @@
       autoResize: config.autoResize, //For mobile apps set on false
       onLoad: () => console.log('[host] Iframe loaded'),
       onSize: ({ height }) => console.log('[host] iframe height:', height),
+      onData: ({ payload, origin }) => console.log('[host] onData:', origin, payload),
       onError: (err) => console.error('[SDK] error', err),
       onServerError: (serverError) => console.warn('[SDK] server error', serverError)
     });
@@ -30,6 +31,10 @@
       EmbedLoyaltyApp.refreshToken(newToken);
     });
     EmbedLoyaltyApp.onSizeRequested(({ height, width }) => {});
+
+    EmbedLoyaltyApp.onDataRequested(({ payload }) => {
+      console.log('Payload on data', payload)
+    });
   </script>
 </body>
 </html>

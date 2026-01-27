@@ -1,4 +1,4 @@
-import { InitConfig, OnSizePayload } from './types/types';
+import { InitConfig, OnSizePayload, OnDataPayload } from './types/types';
 declare class EmbedLoyaltyApp {
     private iframe;
     private origin;
@@ -10,6 +10,7 @@ declare class EmbedLoyaltyApp {
     private autoResize;
     private onServerErrorCb?;
     private onErrorCb?;
+    private onDataCb?;
     init(config: InitConfig): void;
     private handleMessage;
     private applyAutoResize;
@@ -17,6 +18,7 @@ declare class EmbedLoyaltyApp {
     refreshToken(newToken: string): void;
     onTokenRefreshRequested(callback: () => void): void;
     onSizeRequested(callback: (payload: OnSizePayload) => void): void;
+    onDataRequested(callback: (payload: OnDataPayload) => void): void;
     destroy(): void;
 }
 export declare const embedLoyaltyApp: EmbedLoyaltyApp;
