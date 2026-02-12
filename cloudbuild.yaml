@@ -21,15 +21,16 @@ steps:
       - 'gs://cdn-sdk-streaming-west/sdk/$TAG_NAME/embed-sdk.umd.js'
 
   # Step 4: Upload as latest (sdk/embed-sdk.umd.js)
-  - name: 'gcr.io/cloud-builders/gsutil'
-    args:
-      - '-h'
-      - 'Content-Type:text/javascript'
-      - '-h'
-      - 'Cache-Control:public, max-age=300, s-maxage=3600'
-      - 'cp'
-      - 'dist/embed-sdk.umd.js'
-      - 'gs://cdn-sdk-streaming-west/sdk/embed-sdk.umd.js'
+  # TODO: Uncomment after testing
+  # - name: 'gcr.io/cloud-builders/gsutil'
+  #   args:
+  #     - '-h'
+  #     - 'Content-Type:text/javascript'
+  #     - '-h'
+  #     - 'Cache-Control:public, max-age=300, s-maxage=3600'
+  #     - 'cp'
+  #     - 'dist/embed-sdk.umd.js'
+  #     - 'gs://cdn-sdk-streaming-west/sdk/embed-sdk.umd.js'
 
 options:
   logging: CLOUD_LOGGING_ONLY
