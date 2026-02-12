@@ -1,0 +1,35 @@
+steps:
+  # Step 1: Install dependencies
+  - name: 'node:20'
+    entrypoint: 'npm'
+    args: ['install']
+
+  # Step 2: Build the UMD bundle
+  - name: 'node:20'
+    entrypoint: 'npm'
+    args: ['run', 'build']
+
+  # Step 3: Upload versioned file (e.g. sdk/v1.1.2/embed-sdk.umd.js)
+  - name: 'gcr.io/cloud-builders/gsutil'
+    args:
+      - '-h'
+      - 'Content-Type:text/javascript'
+      - '-h'
+      - 'Cache-Control:public, max-age=31536000, immutable'
+      - 'cp'
+      - 'dist/embed-sdk.umd.js'
+      - 'gs://cdn-sdk-streaming-west/sdk/$TAG_NAME/embed-sdk.umd.js'
+
+  # Step 4: Upload as latest (sdk/embed-sdk.umd.js)
+  - name: 'gcr.io/cloud-builders/gsutil'
+    args:
+      - '-h'
+      - 'Content-Type:text/javascript'
+      - '-h'
+      - 'Cache-Control:public, max-age=300, s-maxage=3600'
+      - 'cp'
+      - 'dist/embed-sdk.umd.js'
+      - 'gs://cdn-sdk-streaming-west/sdk/embed-sdk.umd.js'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
