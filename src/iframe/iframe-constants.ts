@@ -4,6 +4,7 @@ export const IFRAME_SANDBOX_ATTRS = [
   'allow-same-origin',
   'allow-popups',
   'allow-popups-to-escape-sandbox',
+  'allow-top-navigation-by-user-activation'
 ] as const;
 
 //Other attrs

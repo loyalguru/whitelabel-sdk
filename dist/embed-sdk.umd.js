@@ -37,6 +37,7 @@
         'allow-same-origin',
         'allow-popups',
         'allow-popups-to-escape-sandbox',
+        'allow-top-navigation-by-user-activation'
     ];
     //Other attrs
     const IFRAME_ALLOW_ATTR = 'clipboard-read; clipboard-write';
