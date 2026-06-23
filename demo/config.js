@@ -1,7 +1,9 @@
   window.EMBED_SDK_CONFIG = {
-    iframeOrigin: 'https://lg-app-palacio-dev.web.app/',
-    token: 'eyJhbGciOiJIUzI1NiJ9.eyJjdXN0b21lcl9pZCI6IjIwIiwiY29tcGFueSI6InBhbGFjaW9fZGV2IiwiZXhwaXJlc19hdCI6IjIwMjUtMTItMzBUMTI6NDM6MDA6MDBaIn0.ItWIDWOgd_Oe3LMPFRalcTXBstF35X8mBVtThGEZlDM',
+    //iframeOrigin: 'https://lg-app-palacio-dev.web.app/',
+    iframeOrigin: 'https://lg-app-palacio.web.app/',
+    //token: 'eyJhbGciOiJIUzI1NiJ9.eyJjb21wYW55IjoicGFsYWNpb19sZyIsImV4cGlyZXNfYXQiOiIyMDI2LTAyLTA5VDIwOjAwOjAyLjYxMDE1Njk0MVoiLCJjdXN0b21lcl9jb2RlIjoiNTY3NjA5In0.EN_SajfpY0zZXx7-BmXKr9PXvjtr8VriGIRPEeWQVqU',
+    token: 'eyJhbGciOiJIUzI1NiJ9.eyJjb21wYW55IjoicGFsYWNpb19sZyIsImV4cGlyZXNfYXQiOiIyMDI3LTAyLTA5VDIwOjAwOjAyLjYxMDE1Njk0MVoiLCJjdXN0b21lcl9jb2RlIjoiNTY3NjA5In0.pnNns3RRfiP3F54Fh-LV1OcvPqX-2OD-WASHKMB3ixM',
     locale: 'es',
     module: '', 
-    autoResize: false,
+    autoResize: true,
   };
