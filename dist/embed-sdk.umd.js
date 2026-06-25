@@ -77,8 +77,9 @@
             this.locale = 'en';
             this.module = '';
             this.autoResize = false;
+            this.gtmEnabled = true;
             this.handleMessage = (event) => {
-                var _a, _b, _c;
+                var _a, _b, _c, _d;
                 const data = event.data;
                 if (!data || typeof data !== 'object')
                     return;
@@ -89,7 +90,12 @@
                         break;
                     }
                     case MSG_DATALAYER_EVENT: {
-                        window.dataLayer.push(data.payload);
+                        const payload = data.payload;
+                        if (this.gtmEnabled) {
+                            window.dataLayer = window.dataLayer || [];
+                            window.dataLayer.push(payload);
+                        }
+                        (_b = this.onTrackingCb) === null || _b === void 0 ? void 0 : _b.call(this, { payload, origin: event.origin });
                         break;
                     }
                     case MSG_SIZE: {
@@ -97,7 +103,7 @@
                         const height = Number(msg.height) || 0;
                         const width = Number(msg.width) || undefined;
                         this.applyAutoResize(height);
-                        (_b = this.onSizeCb) === null || _b === void 0 ? void 0 : _b.call(this, { height, width, origin: event.origin });
+                        (_c = this.onSizeCb) === null || _c === void 0 ? void 0 : _c.call(this, { height, width, origin: event.origin });
                         break;
                     }
                     case MSG_SERVER_ERRORS: {
@@ -112,7 +118,7 @@
                     }
                     case MSG_DATA: {
                         const payload = data.payload;
-                        (_c = this.onDataCb) === null || _c === void 0 ? void 0 : _c.call(this, { payload, origin: event.origin });
+                        (_d = this.onDataCb) === null || _d === void 0 ? void 0 : _d.call(this, { payload, origin: event.origin });
                         break;
                     }
                 }
@@ -123,12 +129,15 @@
             const container = document.getElementById(config.containerId);
             if (!container)
                 throw createSdkError(SDK_ERROR_CODES.CONTAINER_NOT_FOUND);
-            window.dataLayer = window.dataLayer || [];
             this.origin = config.iframeOrigin;
             this.token = config.token;
             this.locale = config.locale || 'en';
             this.module = (_a = config.module) !== null && _a !== void 0 ? _a : '';
             this.autoResize = !!config.autoResize;
+            this.gtmEnabled = config.gtmEnabled !== false;
+            if (this.gtmEnabled) {
+                window.dataLayer = window.dataLayer || [];
+            }
             if (typeof config.onSize === 'function') {
                 this.onSizeCb = config.onSize;
             }
@@ -143,6 +152,9 @@
             }
             if (typeof config.onData === 'function') {
                 this.onDataCb = config.onData;
+            }
+            if (typeof config.onTracking === 'function') {
+                this.onTrackingCb = config.onTracking;
             }
             const iframe = createIframe(config, this.autoResize);
             iframe.onload = () => {
@@ -191,6 +203,9 @@
         }
         onDataRequested(callback) {
             this.onDataCb = callback;
+        }
+        onTrackingRequested(callback) {
+            this.onTrackingCb = callback;
         }
         destroy() {
             var _a;
