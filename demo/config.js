@@ -6,4 +6,5 @@
     locale: 'es',
     module: '', 
     autoResize: true,
+    gtmEnabled: true,
   };

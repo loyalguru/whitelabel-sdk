@@ -19,9 +19,11 @@
       token: config.token,
       locale: config.locale,
       autoResize: config.autoResize, //For mobile apps set on false
+      gtmEnabled: config.gtmEnabled ?? true,
       onLoad: () => console.log('[host] Iframe loaded'),
       onSize: ({ height }) => console.log('[host] iframe height:', height),
       onData: ({ payload, origin }) => console.log('[host] onData:', origin, payload),
+      onTracking: ({ payload, origin }) => console.log('[host] onTracking:', origin, payload),
       onError: (err) => console.error('[SDK] error', err),
       onServerError: (serverError) => console.warn('[SDK] server error', serverError)
     });

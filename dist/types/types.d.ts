@@ -41,6 +41,10 @@ export type OnDataPayload<T = unknown> = {
     payload: T;
     origin: string;
 };
+export type OnTrackingPayload<T = unknown> = {
+    payload: T;
+    origin: string;
+};
 export type DataMessage<T = unknown> = {
     type: typeof MSG_DATA;
     payload: T;
@@ -58,4 +62,6 @@ export type InitConfig = {
     onServerError?: (payload: ServerErrorPayload) => void;
     onTokenRefresh?: () => void;
     onData?: (payload: OnDataPayload) => void;
+    gtmEnabled?: boolean;
+    onTracking?: (payload: OnTrackingPayload) => void;
 };
