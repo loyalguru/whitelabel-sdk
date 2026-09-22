@@ -53,6 +53,16 @@ This will create the compiled files inside the `dist/` folder (according to your
 Publish this to npm/GitHub Packages or serve it from a static/CDN bucket.
 
 
+## Local demo (`demo/`)
+
+The `demo/` folder is a static HTML page (no bundler). Defaults live in `demo/config.js` with safe placeholders (no real JWTs).
+
+1. Copy `demo/config.local.example.js` to `demo/config.local.js` (gitignored).
+2. Put your local `token` / optional `refreshToken` and origins only in `config.local.js`.
+3. Open `demo/index.html` via a local static server. A missing `config.local.js` may 404 in the network tab; the demo still loads defaults from `config.js`.
+
+Never commit real JWTs.
+
 ## Usage
 
 Load the SDK in a plain HTML page and initialize it like this:
