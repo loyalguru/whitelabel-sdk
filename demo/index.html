@@ -4,13 +4,17 @@
   <title>Test SDK</title>
   <script src="https://storage.googleapis.com/cdn-streaming-west/sdk/embed-sdk.umd.js"></script>
   <script src="config.js"></script>
+  <script src="config.local.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body style="margin:0">
   <div id="loyalty-container"></div>
 
   <script>
-    const config = window.EMBED_SDK_CONFIG || {};
+    const config = {
+      ...window.EMBED_SDK_CONFIG,
+      ...(window.EMBED_SDK_CONFIG_LOCAL || {}),
+    };
 
     EmbedLoyaltyApp.init({
       containerId: 'loyalty-container',
@@ -29,8 +33,12 @@
     });
 
     EmbedLoyaltyApp.onTokenRefreshRequested(async () => {
-      const newToken = 'eyJhbGciOiJIUzI1NiJ9.eyJjdXN0b21lcl9pZCI6IjIwIiwiY29tcGFueSI6InBhbGFjaW9fZGV2IiwiZXhwaXJlc19hdCI6IjIwMjYtMTItMzBUMTI6NDM6MDA6MDBaIn0.6dOJZRHSsAQi4-fRF1dufgyHYubEkX9RH518RX4BZiQ';
-      EmbedLoyaltyApp.refreshToken(newToken);
+      const refreshToken = config.refreshToken;
+      if (!refreshToken || refreshToken === 'YOUR_JWT_TOKEN_HERE' || refreshToken === 'YOUR_REFRESH_JWT_TOKEN_HERE') {
+        console.warn('[host] Token refresh requested but no config.refreshToken is configured in config.local.js');
+        return;
+      }
+      EmbedLoyaltyApp.refreshToken(refreshToken);
     });
     EmbedLoyaltyApp.onSizeRequested(({ height, width }) => {});
 
