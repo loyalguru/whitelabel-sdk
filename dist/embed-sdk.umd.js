@@ -40,7 +40,7 @@
         'allow-top-navigation-by-user-activation'
     ];
     //Other attrs
-    const IFRAME_ALLOW_ATTR = 'clipboard-read; clipboard-write';
+    const IFRAME_ALLOW_ATTR = 'clipboard-read; clipboard-write; geolocation *;';
     const IFRAME_SCROLLING_ATTR = 'no';
     //Common base styles and all iframes of the SDK
     const IFRAME_BASE_STYLES = {
