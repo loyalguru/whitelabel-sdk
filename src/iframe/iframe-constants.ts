@@ -8,7 +8,7 @@ export const IFRAME_SANDBOX_ATTRS = [
 ] as const;
 
 //Other attrs
-export const IFRAME_ALLOW_ATTR = 'clipboard-read; clipboard-write';
+export const IFRAME_ALLOW_ATTR = 'clipboard-read; clipboard-write; geolocation *;';
 export const IFRAME_SCROLLING_ATTR = 'no';
 
 //Common base styles and all iframes of the SDK

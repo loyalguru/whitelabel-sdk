@@ -2,12 +2,21 @@
 <html>
 <head>
   <title>Test SDK</title>
-  <script src="https://storage.googleapis.com/cdn-streaming-west/sdk/embed-sdk.umd.js"></script>
+  <!--Real SDK CDN-->
+  <!-- <script src="https://storage.googleapis.com/cdn-streaming-west/sdk/embed-sdk.umd.js"></script> -->
+  
+  <!--Local SDK File-->
+  <script src="embed-sdk.umd.js"></script>
+
   <script src="config.js"></script>
   <script src="config.local.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body style="margin:0">
+  <header class="site-header">
+    <strong> Test SDK</strong> &mdash; Test SDK website header
+  </header>
   <div id="loyalty-container"></div>
 
   <script>

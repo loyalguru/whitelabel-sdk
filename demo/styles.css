@@ -1,0 +1,51 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Page = header + SDK, locked to the viewport height (no page scroll).
+   100dvh accounts for mobile browser toolbars; 100vh is the fallback. */
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.site-header {
+  flex: none;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #ffffff;
+  background: #7977fc;
+  border-bottom: 1px solid #ddd;
+}
+
+/* The SDK container takes whatever is left below the header. */
+#loyalty-container {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+}
+
+/* The SDK sets height: 100vh / max-height: 100vh inline on the iframe, which
+   overflows once the header is above it. Override it so the iframe fills the
+   container instead. Skipped when autoResize is on (main.js adds the class),
+   because then the SDK drives the iframe height from the content. */
+body:not(.auto-resize) #loyalty-container iframe {
+  height: 100% !important;
+  max-height: 100% !important;
+}
+
+/* autoResize: the iframe grows with its content, so let the page scroll. */
+body.auto-resize {
+  height: auto;
+  overflow: visible;
+}
