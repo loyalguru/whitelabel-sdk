@@ -1,0 +1,64 @@
+steps:
+  # Step 1: Ensure the git tag matches package.json version (e.g. tag v1.1.4 <-> "version": "1.1.4")
+  - id: 'check-version'
+    name: 'node:24'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        PKG_VERSION="v$(node -p "require('./package.json').version")"
+        if [ -z "$TAG_NAME" ]; then
+          echo "TAG_NAME is empty; this pipeline must be triggered by a version tag." >&2
+          exit 1
+        fi
+        if [ "$TAG_NAME" != "$$PKG_VERSION" ]; then
+          echo "Tag $TAG_NAME does not match package.json version $$PKG_VERSION" >&2
+          exit 1
+        fi
+
+  # Step 2: Install dependencies exactly as locked
+  - id: 'install'
+    name: 'node:24'
+    entrypoint: 'npm'
+    args: ['ci']
+
+  # Step 3: Run tests before publishing anything
+  - id: 'test'
+    name: 'node:24'
+    entrypoint: 'npm'
+    args: ['test']
+
+  # Step 4: Build the UMD bundle
+  - id: 'build'
+    name: 'node:24'
+    entrypoint: 'npm'
+    args: ['run', 'build']
+
+  # Step 5: Upload versioned file (e.g. sdk/v1.1.4/embed-sdk.umd.js)
+  # --no-clobber: versioned files are cached as immutable, so never overwrite an existing version.
+  - id: 'upload-versioned'
+    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    entrypoint: 'gcloud'
+    args:
+      - 'storage'
+      - 'cp'
+      - '--no-clobber'
+      - '--content-type=text/javascript'
+      - '--cache-control=public, max-age=31536000, immutable'
+      - 'dist/embed-sdk.umd.js'
+      - 'gs://cdn-sdk-streaming-west/sdk/$TAG_NAME/embed-sdk.umd.js'
+
+  # Step 6: Upload as latest (sdk/embed-sdk.umd.js)
+  - id: 'upload-latest'
+    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    entrypoint: 'gcloud'
+    args:
+      - 'storage'
+      - 'cp'
+      - '--content-type=text/javascript'
+      - '--cache-control=public, max-age=300, s-maxage=3600'
+      - 'dist/embed-sdk.umd.js'
+      - 'gs://cdn-sdk-streaming-west/sdk/embed-sdk.umd.js'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
