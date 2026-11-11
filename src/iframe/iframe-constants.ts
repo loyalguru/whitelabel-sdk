@@ -4,10 +4,11 @@ export const IFRAME_SANDBOX_ATTRS = [
   'allow-same-origin',
   'allow-popups',
   'allow-popups-to-escape-sandbox',
+  'allow-top-navigation-by-user-activation'
 ] as const;
 
 //Other attrs
-export const IFRAME_ALLOW_ATTR = 'clipboard-read; clipboard-write';
+export const IFRAME_ALLOW_ATTR = 'clipboard-read; clipboard-write; geolocation *;';
 export const IFRAME_SCROLLING_ATTR = 'no';
 
 //Common base styles and all iframes of the SDK

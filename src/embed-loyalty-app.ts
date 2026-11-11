@@ -5,7 +5,8 @@ import {
   OnSizePayload,
   OutgoingMessage,
   ServerErrorPayload,
-  OnDataPayload,  
+  OnDataPayload,
+  OnTrackingPayload,
 } from './types/types';
 import {
   MSG_REQUEST_NEW_TOKEN,
@@ -13,7 +14,7 @@ import {
   MSG_SIZE,
   MSG_AUTH_TOKEN,
   MSG_SERVER_ERRORS,
-  MSG_DATA,  
+  MSG_DATA,
 } from './types/messages-types';
 
 import { createSdkError, SDK_ERROR_CODES } from './types/errors';
@@ -31,18 +32,23 @@ class EmbedLoyaltyApp {
   private onServerErrorCb?: (payload: ServerErrorPayload) => void;
   private onErrorCb?: (e: Error) => void;
   private onDataCb?: (payload: OnDataPayload) => void;
+  private onTrackingCb?: (payload: OnTrackingPayload) => void;
+  private gtmEnabled = true;
 
   init(config: InitConfig) {
     const container = document.getElementById(config.containerId);
     if (!container) throw createSdkError(SDK_ERROR_CODES.CONTAINER_NOT_FOUND);
-
-    (window as any).dataLayer = (window as any).dataLayer || [];
 
     this.origin = config.iframeOrigin;
     this.token = config.token;
     this.locale = config.locale || 'en';
     this.module = config.module ?? '';
     this.autoResize = !!config.autoResize;
+    this.gtmEnabled = config.gtmEnabled !== false;
+
+    if (this.gtmEnabled) {
+      (window as any).dataLayer = (window as any).dataLayer || [];
+    }
 
     if (typeof config.onSize === 'function') {
       this.onSizeCb = config.onSize;
@@ -62,6 +68,10 @@ class EmbedLoyaltyApp {
 
     if (typeof config.onData === 'function') {
       this.onDataCb = config.onData;
+    }
+
+    if (typeof config.onTracking === 'function') {
+      this.onTrackingCb = config.onTracking;
     }
 
     const iframe = createIframe(config, this.autoResize);
@@ -95,7 +105,14 @@ class EmbedLoyaltyApp {
       }
 
       case MSG_DATALAYER_EVENT: {
-        (window as any).dataLayer.push(data.payload);
+        const payload = data.payload;
+
+        if (this.gtmEnabled) {
+          (window as any).dataLayer = (window as any).dataLayer || [];
+          (window as any).dataLayer.push(payload);
+        }
+
+        this.onTrackingCb?.({ payload, origin: event.origin });
         break;
       }
 
@@ -164,6 +181,10 @@ class EmbedLoyaltyApp {
 
   onDataRequested(callback: (payload: OnDataPayload) => void) {
     this.onDataCb = callback;
+  }
+
+  onTrackingRequested(callback: (payload: OnTrackingPayload) => void) {
+    this.onTrackingCb = callback;
   }
 
   destroy() {

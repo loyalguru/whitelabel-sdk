@@ -1,3 +1,4 @@
 .npmrc
 /node_modules
 /dist
+demo/config.local.js

@@ -11,6 +11,7 @@
     //Messages: SDK -> iframe
     const MSG_AUTH_TOKEN = 'AUTH_TOKEN';
     const MSG_SERVER_ERRORS = 'SERVER_ERRORS';
+    const MSG_DATA = 'DATA';
 
     // SDK internal codes
     const SDK_ERROR_CODES = {
@@ -36,9 +37,10 @@
         'allow-same-origin',
         'allow-popups',
         'allow-popups-to-escape-sandbox',
+        'allow-top-navigation-by-user-activation'
     ];
     //Other attrs
-    const IFRAME_ALLOW_ATTR = 'clipboard-read; clipboard-write';
+    const IFRAME_ALLOW_ATTR = 'clipboard-read; clipboard-write; geolocation *;';
     const IFRAME_SCROLLING_ATTR = 'no';
     //Common base styles and all iframes of the SDK
     const IFRAME_BASE_STYLES = {
@@ -55,7 +57,7 @@
 
     function createIframe(config, autoResize) {
         const iframe = document.createElement('iframe');
-        iframe.src = `${config.iframeOrigin}/${config.module}`;
+        iframe.src = `${config.iframeOrigin}`;
         //Attrs
         iframe.setAttribute('sandbox', IFRAME_SANDBOX_ATTRS.join(' '));
         iframe.setAttribute('allow', IFRAME_ALLOW_ATTR);
@@ -75,8 +77,9 @@
             this.locale = 'en';
             this.module = '';
             this.autoResize = false;
+            this.gtmEnabled = true;
             this.handleMessage = (event) => {
-                var _a, _b;
+                var _a, _b, _c, _d;
                 const data = event.data;
                 if (!data || typeof data !== 'object')
                     return;
@@ -87,7 +90,12 @@
                         break;
                     }
                     case MSG_DATALAYER_EVENT: {
-                        window.dataLayer.push(data.payload);
+                        const payload = data.payload;
+                        if (this.gtmEnabled) {
+                            window.dataLayer = window.dataLayer || [];
+                            window.dataLayer.push(payload);
+                        }
+                        (_b = this.onTrackingCb) === null || _b === void 0 ? void 0 : _b.call(this, { payload, origin: event.origin });
                         break;
                     }
                     case MSG_SIZE: {
@@ -95,7 +103,7 @@
                         const height = Number(msg.height) || 0;
                         const width = Number(msg.width) || undefined;
                         this.applyAutoResize(height);
-                        (_b = this.onSizeCb) === null || _b === void 0 ? void 0 : _b.call(this, { height, width, origin: event.origin });
+                        (_c = this.onSizeCb) === null || _c === void 0 ? void 0 : _c.call(this, { height, width, origin: event.origin });
                         break;
                     }
                     case MSG_SERVER_ERRORS: {
@@ -108,6 +116,11 @@
                         }
                         break;
                     }
+                    case MSG_DATA: {
+                        const payload = data.payload;
+                        (_d = this.onDataCb) === null || _d === void 0 ? void 0 : _d.call(this, { payload, origin: event.origin });
+                        break;
+                    }
                 }
             };
         }
@@ -116,12 +129,15 @@
             const container = document.getElementById(config.containerId);
             if (!container)
                 throw createSdkError(SDK_ERROR_CODES.CONTAINER_NOT_FOUND);
-            window.dataLayer = window.dataLayer || [];
             this.origin = config.iframeOrigin;
             this.token = config.token;
             this.locale = config.locale || 'en';
             this.module = (_a = config.module) !== null && _a !== void 0 ? _a : '';
             this.autoResize = !!config.autoResize;
+            this.gtmEnabled = config.gtmEnabled !== false;
+            if (this.gtmEnabled) {
+                window.dataLayer = window.dataLayer || [];
+            }
             if (typeof config.onSize === 'function') {
                 this.onSizeCb = config.onSize;
             }
@@ -133,6 +149,12 @@
             }
             if (typeof config.onError === 'function') {
                 this.onErrorCb = config.onError;
+            }
+            if (typeof config.onData === 'function') {
+                this.onDataCb = config.onData;
+            }
+            if (typeof config.onTracking === 'function') {
+                this.onTrackingCb = config.onTracking;
             }
             const iframe = createIframe(config, this.autoResize);
             iframe.onload = () => {
@@ -179,6 +201,12 @@
         onSizeRequested(callback) {
             this.onSizeCb = callback;
         }
+        onDataRequested(callback) {
+            this.onDataCb = callback;
+        }
+        onTrackingRequested(callback) {
+            this.onTrackingCb = callback;
+        }
         destroy() {
             var _a;
             window.removeEventListener('message', this.handleMessage);
@@ -193,6 +221,7 @@
     }
 
     exports.MSG_AUTH_TOKEN = MSG_AUTH_TOKEN;
+    exports.MSG_DATA = MSG_DATA;
     exports.MSG_DATALAYER_EVENT = MSG_DATALAYER_EVENT;
     exports.MSG_REQUEST_NEW_TOKEN = MSG_REQUEST_NEW_TOKEN;
     exports.MSG_SERVER_ERRORS = MSG_SERVER_ERRORS;
