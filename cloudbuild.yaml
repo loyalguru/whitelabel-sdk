@@ -1,7 +1,7 @@
 steps:
   # Step 1: Ensure the git tag matches package.json version (e.g. tag v1.1.4 <-> "version": "1.1.4")
   - id: 'check-version'
-    name: 'node:20'
+    name: 'node:24'
     entrypoint: 'bash'
     args:
       - '-c'
@@ -18,19 +18,19 @@ steps:
 
   # Step 2: Install dependencies exactly as locked
   - id: 'install'
-    name: 'node:20'
+    name: 'node:24'
     entrypoint: 'npm'
     args: ['ci']
 
   # Step 3: Run tests before publishing anything
   - id: 'test'
-    name: 'node:20'
+    name: 'node:24'
     entrypoint: 'npm'
     args: ['test']
 
   # Step 4: Build the UMD bundle
   - id: 'build'
-    name: 'node:20'
+    name: 'node:24'
     entrypoint: 'npm'
     args: ['run', 'build']
 
