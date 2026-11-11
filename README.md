@@ -50,7 +50,62 @@ This will create the compiled files inside the `dist/` folder (according to your
 - `dist/embed-sdk.umd.js` → UMD bundle you can include in a `<script>`
 - `dist/index.d.ts` → TypeScript declarations
 
-Publish this to npm/GitHub Packages or serve it from a static/CDN bucket.
+Publish this to npm/GitHub Packages or serve it from a static/CDN bucket. For the Loyal Guru CDN, use the automated release below.
+
+
+## Using the SDK from the CDN
+
+Every release is published to `https://cdn.loyal.guru/sdk/`, which is served from the `cdn-sdk-streaming-west` GCS bucket (project `streaming-west`).
+
+| URL | Content | Cache |
+| --- | --- | --- |
+| `https://cdn.loyal.guru/sdk/vX.Y.Z/embed-sdk.umd.js` | A fixed version. It never changes after it is published. | 1 year, `immutable` |
+| `https://cdn.loyal.guru/sdk/embed-sdk.umd.js` | The latest release. It is replaced on every release. | 5 min in the browser, 1 h at the CDN |
+
+Use a fixed version in production, so a new release never changes a client's integration without warning:
+
+```html
+<script src="https://cdn.loyal.guru/sdk/v1.1.4/embed-sdk.umd.js"></script>
+```
+
+Use the latest URL only for demos or tests.
+
+
+## Releasing a new version
+
+Releases are deployed by Cloud Build. The trigger `whitelabel-sdk-deploy` (project `streaming-west`) runs [`cloudbuild.yaml`](cloudbuild.yaml) when a tag matching `v*` is pushed.
+
+1. Bump `version` in `package.json` (and `package-lock.json`) on `main`, for example to `1.1.5`. `npm version` does both and creates the tag:
+   ```bash
+   npm version patch   # or minor / major
+   ```
+   If you edit the version by hand, create the tag yourself:
+   ```bash
+   git tag v1.1.5
+   ```
+2. Push the commit and the tag:
+   ```bash
+   git push origin main --follow-tags
+   ```
+3. Follow the build in Cloud Build (project `streaming-west`) → History. Then check that the file is live:
+   ```bash
+   curl -sI https://cdn.loyal.guru/sdk/v1.1.5/embed-sdk.umd.js
+   ```
+
+### What the pipeline does
+
+1. **check-version**: fails if the tag is not exactly `v` + the `package.json` version (for example tag `v1.1.5` and `"version": "1.1.5"`).
+2. **install**: `npm ci`, using the exact versions in the lockfile.
+3. **test**: `npm test`. Nothing is uploaded if the tests fail.
+4. **build**: `npm run build` → `dist/embed-sdk.umd.js`.
+5. **upload-versioned**: uploads to `gs://cdn-sdk-streaming-west/sdk/vX.Y.Z/embed-sdk.umd.js`. It uses `--no-clobber`, so an existing version is never overwritten.
+6. **upload-latest**: replaces `gs://cdn-sdk-streaming-west/sdk/embed-sdk.umd.js`.
+
+### Notes
+
+- **Published versions can't be fixed in place.** They are cached as immutable, and the pipeline won't overwrite one that already exists. To fix a bad release, publish a new patch version.
+- **Re-pushing an existing tag does not replace its file.** The versioned upload is skipped and only the latest file is updated.
+- Don't upload SDK files to the bucket by hand. Manual uploads skip the tests and the cache headers.
 
 
 ## Local demo (`demo/`)
@@ -282,6 +337,6 @@ If the parent host page has scroll constraints, you can override these with your
 
 - The iframe URL is built as `${iframeOrigin}/${module}`. Make sure your white-label host actually serves those routes.
 
-- If you plan to publish to npm as `@loyalguru/embed-sdk`, update the `repository`, `name`, and CI workflow accordingly.
+- If you plan to publish to npm as `@loyalguru/embed-sdk`, update the `repository` and `name` in `package.json`, and add an npm publish step to the pipeline (see [Releasing a new version](#releasing-a-new-version)).
 
 
